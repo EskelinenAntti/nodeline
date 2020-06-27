@@ -46,10 +46,11 @@ function verifyPostData(req, res, next) {
 }
 
 app.post("/", verifyPostData, function (req, res) {
-  exec("rm -rf temp");
-  exec("git clone " + GIT_URL + " temp", handleOutput);
-  exec(WORK_DIR + "/build.sh", handleOutput);
-  exec("mv temp app");
+  exec(`rm -rf ${WORK_DIR}/temp`, handleOutput);
+  exec(`git clone ${GIT_URL} ${WORK_DIR}/temp`, handleOutput);
+  exec(`${WORK_DIR}/build.sh`, handleOutput);
+  exec(`rm -rf ${WORK_DIR}/app`, handleOutput);
+  exec(`mv ${WORK_DIR}/temp ${WORK_DIR}/app`, handleOutput);
 
   res.status(200).send("Request body was signed");
 });
