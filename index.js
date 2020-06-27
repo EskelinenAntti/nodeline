@@ -45,6 +45,7 @@ function verifyPostData(req, res, next) {
 }
 
 app.post("/", verifyPostData, function (req, res) {
+  exec(`chmod +x ${WORK_DIR}/build.sh`, handleOutput);
   exec(`${WORK_DIR}/build.sh`, handleOutput);
 
   res.status(200).send("Request body was signed");
