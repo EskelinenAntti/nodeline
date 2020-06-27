@@ -6,7 +6,8 @@
  */
 const SECRET = process.env.SECRET;
 const PORT = process.env.PORT || 8700;
-const BUILD_SCRIPT = process.env.BUILD_SCRIPT || "./build.sh";
+const WORK_DIR = process.env.WORK_DIR;
+const GIT_URL = process.env.GIT_URL;
 
 const crypto = require("crypto");
 const express = require("express");
@@ -45,20 +46,25 @@ function verifyPostData(req, res, next) {
 }
 
 app.post("/", verifyPostData, function (req, res) {
-  exec(BUILD_SCRIPT, (error, stdout, stderr) => {
-    if (error) {
-      console.log(`error: ${error.message}`);
-      return;
-    }
-    if (stderr) {
-      console.log(`stderr: ${stderr}`);
-      return;
-    }
-    console.log(`stdout: ${stdout}`);
-  });
+  exec("rm -rf temp");
+  exec("git clone " + GIT_URL + " temp", handleOutput);
+  exec(WORK_DIR + "/build.sh", handleOutput);
+  exec("mv temp app");
 
   res.status(200).send("Request body was signed");
 });
+
+const handleOutput = (error, stdout, stderr) => {
+  if (error) {
+    console.log(`error: ${error.message}`);
+    return;
+  }
+  if (stderr) {
+    console.log(`stderr: ${stderr}`);
+    return;
+  }
+  console.log(`stdout: ${stdout}`);
+};
 
 app.use((err, req, res, next) => {
   if (err) console.error(err);
